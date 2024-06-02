@@ -2,15 +2,15 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "kokatic_rg" {
-  name     = "kokatic_rg"
+resource "azurerm_resource_group" "devkokaticrg" {
+  name     = "devkokatic_rg"
   location = "East US"
 }
 
-resource "azurerm_postgresql_flexible_server" "kokatic_bdd" {
-  name                   = "kokaticbddazd"
-  resource_group_name    = azurerm_resource_group.kokatic_rg.name
-  location               = azurerm_resource_group.kokatic_rg.location
+resource "azurerm_postgresql_flexible_server" "devkokaticbdd" {
+  name                   = "devkokaticbddd"
+  resource_group_name    = azurerm_resource_group.devkokaticrg.name
+  location               = azurerm_resource_group.devkokaticrg.location
   administrator_login    = "psqladmin"
   administrator_password = "H@Sh1CoR3!"
   version                = "12"
@@ -27,18 +27,18 @@ resource "azurerm_postgresql_flexible_server" "kokatic_bdd" {
   }
 }
 
-resource "azurerm_storage_account" "kokaticstorageaccbdd" {
-  name                     = "kokaticstorageaccbdd"
-  resource_group_name      = azurerm_resource_group.kokatic_rg.name
-  location                 = azurerm_resource_group.kokatic_rg.location
+resource "azurerm_storage_account" "devkokaticstoragebdd" {
+  name                     = "devkokaticstoragebdd"
+  resource_group_name      = azurerm_resource_group.devkokaticrg.name
+  location                 = azurerm_resource_group.devkokaticrg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-resource "azurerm_app_service_plan" "kokatic_app_service_plan" {
-  name                = "kokatic-app-service-plan"
-  location            = azurerm_resource_group.kokatic_rg.location
-  resource_group_name = azurerm_resource_group.kokatic_rg.name
+resource "azurerm_app_service_plan" "devkokaticapp" {
+  name                = "devkokaticapp"
+  location            = azurerm_resource_group.devkokaticrg.location
+  resource_group_name = azurerm_resource_group.devkokaticrg.name
   kind                = "FunctionApp"
   reserved            = true
 
@@ -48,16 +48,23 @@ resource "azurerm_app_service_plan" "kokatic_app_service_plan" {
   }
 }
 
-resource "azurerm_function_app" "kokaticsapp" {
-  name                       = "kokaticapp"
-  location                   = azurerm_resource_group.kokatic_rg.location
-  resource_group_name        = azurerm_resource_group.kokatic_rg.name
-  app_service_plan_id        = azurerm_app_service_plan.kokatic_app_service_plan.id
-  storage_account_name       = azurerm_storage_account.my_storage_account.name
-  storage_account_access_key = azurerm_storage_account.my_storage_account.primary_access_key
+resource "azurerm_function_app" "devkokaticsapp" {
+  name                       = "devkokaticapp"
+  location                   = azurerm_resource_group.devkokaticrg.location
+  resource_group_name        = azurerm_resource_group.devkokaticrg.name
+  app_service_plan_id        = azurerm_app_service_plan.devkokaticapp.id
+  storage_account_name       = azurerm_storage_account.devkokaticstoragebdd.name
+  storage_account_access_key = azurerm_storage_account.devkokaticstoragebdd.primary_access_key
   os_type                    = "linux"
+  
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME" = "python"
+    "FUNCTIONS_WORKER_RUNTIME" = "python" 
   }
+
+  site_config {
+    linux_fx_version = "Python|3.9"
+    elastic_instance_minimum="1"
+  }
+  
 }
