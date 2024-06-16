@@ -35,16 +35,17 @@ resource "azurerm_storage_account" "devkokaticstoragebdd" {
   account_replication_type = "LRS"
 }
 
-resource "azurerm_app_service_plan" "devkokaticapp" {
-  name                = "devkokaticapp"
-  location            = azurerm_resource_group.devkokaticrg.location
-  resource_group_name = azurerm_resource_group.devkokaticrg.name
-  kind                = "FunctionApp"
-  reserved            = true
+resource "azurerm_function_app" "devkokaticapp" {
+  name                       = "devkokaticapp"
+  location                   = azurerm_resource_group.devkokaticrg.location
+  resource_group_name        = azurerm_resource_group.devkokaticrg.name
+  app_service_plan_id        = azurerm_service_plan.devkokaticapp.id
+  storage_account_name       = azurerm_storage_account.devkokaticstoragebdd.name
+  storage_account_access_key = azurerm_storage_account.devkokaticstoragebdd.primary_access_key
+  os_type                    = "linux"
 
-  sku {
-    tier = "ElasticPremium"
-    size = "EP1"
+  app_settings = {
+    "FUNCTIONS_WORKER_RUNTIME" = "python"
   }
 }
 
